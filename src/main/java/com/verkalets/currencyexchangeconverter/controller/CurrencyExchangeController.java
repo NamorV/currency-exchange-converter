@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,7 +27,7 @@ public class CurrencyExchangeController {
     }
 
     @GetMapping("/calculate/{fromCode}/{toCode}/{amount}")
-    public void calculate(@PathVariable String fromCode,
+    public ResponseEntity calculate(@PathVariable String fromCode,
                                      @PathVariable String toCode,
                                      @PathVariable double amount ) {
         double result;
@@ -37,7 +38,21 @@ public class CurrencyExchangeController {
         } else {
             result = amount * (getCurrencyRate(fromCode) / getCurrencyRate(toCode));
         }
-        System.out.println(result);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping("/getExchangeRates")
+    public ResponseEntity showExchangeRates(@RequestBody List<String> currencies) {
+        List<CurrencyInformation> responseBody = new ArrayList<>();
+        currencies.remove("PLN");
+        final String uri = "http://api.nbp.pl/api/exchangerates/rates/A/";
+        RestTemplate restTemplate = new RestTemplate();
+
+        for (String currency : currencies) {
+            responseBody.add(restTemplate.getForObject(uri + currency, CurrencyInformation.class));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
     private double getCurrencyRate(String code) {
