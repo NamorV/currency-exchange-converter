@@ -2,8 +2,10 @@ package com.verkalets.currencyexchangeconverter.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "CURRENCY")
 public class Currency {
     @Id
     private String code;
